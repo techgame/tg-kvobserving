@@ -113,11 +113,11 @@ class KVPathLink(object):
     def _linkWatcher(self, kvlinks, bAdd=True):
         for key, kvpub in kvlinks[:-1]:
             if kvpub is not None:
-                kvpub.toggle(bAdd, key, self._onLinkPathChanged)
+                kvpub.change(bAdd, key, self._onLinkPathChanged)
 
         key, kvpub = kvlinks[-1]
         if kvpub is not None:
-            kvpub.toggle(bAdd, key, self._onLinkValueChanged)
+            kvpub.change(bAdd, key, self._onLinkValueChanged)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
