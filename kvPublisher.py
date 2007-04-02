@@ -11,17 +11,19 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from weakref import ref
-from collections import defaultdict
+
+from TG.metaObserving import observerSet
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVPublisher(object):
+    KeyedObserverSet = observerSet.KeyedObserverSet
     pubName = 'kvpub'
 
     def __init__(self):
-        self.kvo = defaultdict(set)
+        self.kvo = self.KeyedObserverSet()
         self.host = None
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,56 +48,41 @@ class KVPublisher(object):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    @classmethod
+    def new(klass):
+        return klass()
+
     def copy(self):
-        klass = type(self)
-        result = klass.__new__(klass)
+        result = self.new()
         return result.copyFrom(self)
 
     def copyFrom(self, other):
-        self.kvo = self.kvoCopy(other.kvo)
+        self.kvo = other.kvo.copy()
         self.host = other.host
         return self
-
-    def kvoCopy(self, other=None):
-        kvo = defaultdict(set)
-        if other is None:
-            other = self.kvo
-        if other:
-            kvo.update((k, v.copy()) for k,v in other.iteritems())
-        return kvo
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __getitem__(self, key):
         return self.kvo[key]
+    def add(self, key, kvObserver):
+        return self.kvo.add(key, kvObserver)
+    def remove(self, key, kvObserver):
+        return self.kvo.remove(key, kvObserver)
+    def discard(self, key, kvObserver):
+        return self.kvo.discard(key, kvObserver)
+    def clear(self, key=None):
+        return self.kvo.clear(key)
 
     def on(self, key):
         return lambda kvObserver: self.add(key, kvObserver)
-    def add(self, key, kvObserver):
-        self.kvo[key].add(kvObserver)
-        return kvObserver
-    def remove(self, key, kvObserver):
-        kvoEntry = self.kvo[key]
-        kvoEntry.remove(kvObserver)
-        if not kvoEntry:
-            del self.kvo[key]
-    def discard(self, key, kvObserver):
-        kvoEntry = self.kvo[key]
-        kvoEntry.discard(kvObserver)
-        if not kvoEntry:
-            del self.kvo[key]
-    def clear(self, key=None):
-        if key is None:
-            self.kvo.clear()
-        else:
-            del self.kvo[key]
 
     def depend(self, key, otherKeys):
+        def pushDependency(host, okey, depKey=key):
+            host.kvpub(depKey)
+
         if isinstance(otherKeys, basestring):
             otherKeys = [otherKeys]
-
-        def pushDependency(host, okey):
-            host.kvpub(key)
 
         kvo = self.kvo
         for okey in otherKeys:
@@ -116,8 +103,7 @@ class KVPublisher(object):
         kvoEntry = self.kvo.get(key)
         if kvoEntry:
             host = self.host()
-            for e in kvoEntry.copy():
-                e(host, key)
+            kvoEntry.call_n2(host, key)
     __call__ = publish
 
     def publishQue(self, kvqueue, host=None):
@@ -138,9 +124,10 @@ class KVPublisher(object):
             # visit as in publish()
             kvoEntry = kvo.get(key)
             if kvoEntry:
-                for e in kvoEntry.copy():
-                    e(host, key)
+                kvoEntry.call_n2(host, key)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #~ Locking access
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     _ctxdepth = 0
