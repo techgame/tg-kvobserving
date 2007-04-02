@@ -10,6 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from TG.metaObserving.observerSet import ObserverSet
 from .kvObject import KVObject
 from .kvProperty import KVProperty
 from .kvPathLink import KVPathLink
@@ -21,33 +22,36 @@ from .kvPathLink import KVPathLink
 class KVWatcher(KVObject, KVPathLink):
     valueDefault = None
     value = KVProperty(valueDefault)
+    vobs = KVProperty(ObserverSet)
+
     select = KVProperty(valueDefault)
 
-    def add(self, valueObserver):
-        self.kvpub.add('value', valueObserver)
-        return valueObserver
-    def remove(self, valueObserver):
-        self.kvpub.remove('value', valueObserver)
-        return valueObserver
+    def add(self, observer):
+        self.vobs.add(observer)
+        return observer
+    def remove(self, observer):
+        self.vobs.remove(observer)
+        return observer
     def clear(self):
-        self.kvpub.clear('value')
+        self.vobs.clear()
 
-    def addAndNotify(self, valueObserver):
-        valueObserver(self, 'value')
-        return self.add(valueObserver)
-        
+    def addAndNotify(self, observer):
+        observer(self, self.value)
+        return self.add(observer)
 
     def _onLinkValueChanged(self, host, key):
-        if key in self.kvOperators:
-            value = host
-        else: 
+        if key not in self.kvOperators:
             value = getattr(host, key, self.valueDefault)
+        else: value = host
 
         self.value = value
+        self.vobs.call_n2(self, value)
     _onLinkWatched = _onLinkValueChanged
 
     def _onLinkIncomplete(self, linkHost, key, kvpath):
-        self.value = self.valueDefault
+        value = self.valueDefault
+        self.value = value
+        self.vobs.call_n2(self, value)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Extend KVObject

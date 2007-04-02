@@ -51,8 +51,8 @@ class TestKVObserver(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, kv.data)
-        def evt(kvw, key):
-            result.append(kvw.value)
+        def evt(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -67,8 +67,8 @@ class TestKVObserver(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, kv.data)
-        def evt(kvw, key):
-            result.append(kvw.value)
+        def evt(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -86,8 +86,8 @@ class TestKVObserver(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, kv.left.data)
-        def evt(kvw, key):
-            result.append(kvw.value)
+        def evt(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -102,8 +102,8 @@ class TestKVObserver(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, kv.left.right.data)
-        def evt(kvw, key):
-            result.append(kvw.value)
+        def evt(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -121,8 +121,8 @@ class TestKVObserver(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, 'left.data')
-        def evt(kvw, key):
-            result.append(kvw.value)
+        def evt(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -137,8 +137,8 @@ class TestKVObserver(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, 'left.right.data')
-        def evt(kvw, key):
-            result.append(kvw.value)
+        def evt(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -164,8 +164,8 @@ class TestKVWatcher(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, kv.left.data[...])
-        def evt(kvw, key):
-            result.append(kvw.value.copy())
+        def evt(kvw, value):
+            result.append(value.copy())
 
         self.assertEqual(result, [])
 
@@ -185,8 +185,8 @@ class TestKVWatcher(unittest.TestCase):
         tree = self.tree
 
         @kvwatch(tree, kv.right.data[...])
-        def evt(kvw, key):
-            result.append(kvw.value.copy())
+        def evt(kvw, value):
+            result.append(value.copy())
 
         self.assertEqual(result, [])
 
@@ -223,12 +223,12 @@ class TestKVWatcherDependency(unittest.TestCase):
         watchData = KVWatcher(tree, kv.data[...])
 
         @watchData.add
-        def onDataChange(kvw, key):
-            kvw.select = kvw.value[0]
+        def onDataChange(kvw, value):
+            kvw.select = value[0]
 
         @kvwatch(watchData, kv.select.data)
-        def onSelectChange(kvw, key):
-            result.append(kvw.value)
+        def onSelectChange(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 

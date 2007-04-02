@@ -57,9 +57,9 @@ class TestKVDependentData(unittest.TestCase):
         demo = KVDemoDepData()
 
         @kvwatch(demo, kv.sum)
-        def onSumChange(kvw, key):
-            #print 'sum:', key, kvw.value
-            result.append(kvw.value)
+        def onSumChange(kvw, value):
+            #print 'sum:', key, value
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -74,9 +74,9 @@ class TestKVDependentData(unittest.TestCase):
         demo = KVDemoDepData()
 
         @kvwatch(demo, kv.prod)
-        def onProdChange(kvw, key):
-            #print 'prod:', key, kvw.value
-            result.append(kvw.value)
+        def onProdChange(kvw, value):
+            #print 'prod:', key, value
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -94,8 +94,8 @@ class TestKVDependentData(unittest.TestCase):
         demo = KVDemoDepData()
 
         @kvwatch(demo, kv.prodSum)
-        def onProdSumChange(kvw, key):
-            result.append(kvw.value)
+        def onProdSumChange(kvw, value):
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -113,7 +113,7 @@ class TestKVDependentData(unittest.TestCase):
         demo = KVDemoDepData()
 
         @kvwatch(demo, kv.methodNotify)
-        def onMethodNotify(kvw, key):
+        def onMethodNotify(kvw, value):
             result[0] += 1
 
         self.assertEqual(result, [0])
