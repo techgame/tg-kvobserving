@@ -18,6 +18,6 @@ from kvDict import KVDict
 from kvSet import KVSet
 from kvList import KVList
 
-from kvWatcher import kv, KVPath, KVPathLink
+from kvPathLink import kv, KVPath, KVPathLink
 from kvWatcher import KVWatcher, kvwatch
 

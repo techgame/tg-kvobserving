@@ -65,6 +65,8 @@ class KVPublisher(object):
 
     def __getitem__(self, key):
         return self.kvo[key]
+    def toggle(self, bAdd, key, kvObserver):
+        return self.kvo.toggle(bAdd, key, kvObserver)
     def add(self, key, kvObserver):
         return self.kvo.add(key, kvObserver)
     def remove(self, key, kvObserver):
