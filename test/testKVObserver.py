@@ -36,7 +36,7 @@ class TestKVObserve(unittest.TestCase):
 
         self.assertEqual(result, [None, 2])
     
-    def testPath(self):
+    def testPathWithNonKVObject(self):
         class fobject(object): pass
 
         result = []
@@ -59,6 +59,41 @@ class TestKVObserve(unittest.TestCase):
         d.left = f
 
         self.assertEqual(result, [None, None, 42])
+
+        f.fun = 'no update'
+        self.assertEqual(result, [None, None, 42])
+
+        f.fun = 'manual update'
+        d.left = f
+        self.assertEqual(result, [None, None, 42, 'manual update'])
+    
+    def testPath(self):
+        class tobject(KVObject): 
+            fun = KVProperty(None)
+
+        result = []
+        class DemoObj(KVObject):
+            kvobserve = KVObject.kvobserve
+            left = KVProperty(None)
+
+            @kvobserve('left.fun')
+            def change(self, value):
+                result.append(value)
+
+        d = DemoObj()
+        self.assertEqual(result, [None])
+
+        d.left = 2
+        self.assertEqual(result, [None, None])
+
+        t = tobject()
+        t.fun = 42
+        d.left = t
+
+        self.assertEqual(result, [None, None, 42])
+
+        t.fun = 'update'
+        self.assertEqual(result, [None, None, 42, 'update'])
     
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Unittest Main 
