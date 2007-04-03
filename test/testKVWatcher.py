@@ -35,7 +35,7 @@ class KVNode(KVObject):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class TestKVObserver(unittest.TestCase):
+class TestKVWatch(unittest.TestCase):
     def setUp(self):
         self.tree = KVNode('a',
                 KVNode('b',

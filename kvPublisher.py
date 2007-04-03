@@ -23,7 +23,7 @@ class KVPublisher(object):
     pubName = 'kvpub'
 
     def __init__(self):
-        self.kvo = self.KeyedObserverSet()
+        self.koset = self.KeyedObserverSet()
         self.host = None
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -59,24 +59,24 @@ class KVPublisher(object):
         return result.copyFrom(self)
 
     def copyFrom(self, other):
-        self.kvo = other.kvo.copy()
+        self.koset = other.koset.copy()
         self.host = other.host
         return self
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __getitem__(self, key):
-        return self.kvo[key]
+        return self.koset[key]
     def change(self, bAdd, key, kvObserver):
-        return self.kvo.change(bAdd, key, kvObserver)
+        return self.koset.change(bAdd, key, kvObserver)
     def add(self, key, kvObserver):
-        return self.kvo.add(key, kvObserver)
+        return self.koset.add(key, kvObserver)
     def remove(self, key, kvObserver):
-        return self.kvo.remove(key, kvObserver)
+        return self.koset.remove(key, kvObserver)
     def discard(self, key, kvObserver):
-        return self.kvo.discard(key, kvObserver)
+        return self.koset.discard(key, kvObserver)
     def clear(self, key=None):
-        return self.kvo.clear(key)
+        return self.koset.clear(key)
 
     def on(self, key):
         return lambda kvObserver: self.add(key, kvObserver)
@@ -88,9 +88,9 @@ class KVPublisher(object):
         if isinstance(otherKeys, basestring):
             otherKeys = [otherKeys]
 
-        kvo = self.kvo
+        koset = self.koset
         for okey in otherKeys:
-            kvo[okey].add(pushDependency)
+            koset[okey].add(pushDependency)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -104,10 +104,10 @@ class KVPublisher(object):
             kvqueue.append(key)
             return
 
-        kvoEntry = self.kvo.get(key)
-        if kvoEntry:
+        entry = self.koset.get(key)
+        if entry:
             host = self.host()
-            kvoEntry.call_n2(host, key)
+            entry.call_n2(host, key)
     __call__ = publish
 
     def publishQue(self, kvqueue, host=None):
@@ -116,7 +116,7 @@ class KVPublisher(object):
 
         # loop optimized version of publish()
         host = self.host()
-        kvo = self.kvo
+        koset = self.koset
 
         visited = set()
         for key in kvqueue:
@@ -126,9 +126,9 @@ class KVPublisher(object):
             else: visited.add(key)
 
             # visit as in publish()
-            kvoEntry = kvo.get(key)
-            if kvoEntry:
-                kvoEntry.call_n2(host, key)
+            entry = koset.get(key)
+            if entry:
+                entry.call_n2(host, key)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Locking access

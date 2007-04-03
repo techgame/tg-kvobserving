@@ -63,7 +63,7 @@ class KVPathLink(object):
 
         if root is None or not kvpath:
             # the root kvobj is missing... just note it so it can be updated later
-            kvlinks.append((key, None))
+            kvlinks.append((None, None))
             self._linkWatcher(kvlinks)
 
             self._onLinkIncomplete(None, None, kvpath)
