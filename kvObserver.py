@@ -19,26 +19,16 @@ from .kvPathLink import KVPathLink
 
 class KVObserver(KVPathLink):
     valueDefault = None
-    def __init__(self, notify=None, root=None, kvpath=None):
-        self.notify = notify
-        KVPathLink.__init__(self, root, kvpath)
+    notify = None
 
     def onObservableInit(self, pubName, obInstance):
         self.link(root=obInstance)
     onObservableInit.priority = 5
 
-    @classmethod
-    def fromKVPath(klass, kvpath):
-        return klass(kvpath=kvpath)
-
-    @classmethod
-    def observe(klass, kvpath):
-        self = klass.fromKVPath(kvpath)
-        return self.decorate
-
     def decorate(self, notify):
         self.notify = notify
-        notify.onObservableInit = self.onObservableInit
+        if self.root is None:
+            notify.onObservableInit = self.onObservableInit
         return notify
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,17 +37,33 @@ class KVObserver(KVPathLink):
         if key not in self.kvOperators:
             value = getattr(host, key, self.valueDefault)
         else: value = host
+        self._callNotify(host, value)
+    _onLinkWatched = _onLinkValueChanged
+
+    def _onLinkIncomplete(self, linkHost, key, kvpath):
+        self._callNotify(None, self.valueDefault)
+
+    def _callNotify(self, host, value):
         notify = self.notify
         if notify is not None:
             notify(host, value)
 
-    _onLinkWatched = _onLinkValueChanged
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _onLinkIncomplete(self, linkHost, key, kvpath):
-        notify = self.notify
-        if notify is not None:
-            notify(None, self.valueDefault)
+def kvobserve(rootOrPath, kvpath=None):
+    """KVObserver decorator that attaches to a method"""
+    if kvpath is None:
+        kvpath = rootOrPath
+        root = None
+    elif isinstance(rootOrPath, type): 
+        # if this is a classmethod, then pretend that root was not passed
+        root = None
+    else:
+        root = rootOrPath
 
-kvo = KVObserver.observe
-KVObject.kvo = kvo
+    obs = KVObserver(root, kvpath)
+    return obs.decorate
+
+KVObject.kvo = kvobserve
+KVObject.kvobserve = classmethod(kvobserve)
 

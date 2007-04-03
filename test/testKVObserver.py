@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import unittest
-from TG.kvObserving import KVObject, KVProperty, kvo
+from TG.kvObserving import KVObject, KVProperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -21,9 +21,10 @@ class TestKVObserve(unittest.TestCase):
     def testSimple(self):
         result = []
         class DemoObj(KVObject):
+            kvobserve = KVObject.kvobserve
             left = KVProperty(None)
 
-            @kvo('left')
+            @kvobserve('left')
             def change(self, value):
                 result.append(value)
 
@@ -40,9 +41,10 @@ class TestKVObserve(unittest.TestCase):
 
         result = []
         class DemoObj(KVObject):
+            kvobserve = KVObject.kvobserve
             left = KVProperty(None)
 
-            @kvo('left.fun')
+            @kvobserve('left.fun')
             def change(self, value):
                 result.append(value)
 

@@ -14,7 +14,7 @@ from __future__ import with_statement
 
 import unittest
 
-from TG.kvObserving import KVObject, KVProperty, KVList, KVDict, KVWatcher, kvwatch, kv
+from TG.kvObserving import KVObject, KVProperty, KVList, KVDict, KVWatcher, kvwatch, kv, kvobserve
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -45,8 +45,8 @@ class KVDemoDepData(KVObject):
         return (self.prod, max(1, self.sum))
     prodSum = property(getProdSum)
 
-    @kvpub.on('sum')
-    def onMethodNotify(self, key):
+    @kvobserve('sum')
+    def onMethodNotify(self, value):
         self.kvpub('methodNotify')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

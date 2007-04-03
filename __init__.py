@@ -19,6 +19,6 @@ from kvSet import KVSet
 from kvList import KVList
 
 from kvPathLink import kv, KVPath, KVPathLink
-from kvObserver import KVObserver, kvo
+from kvObserver import KVObserver, kvobserve
 from kvWatcher import KVWatcher, kvwatch
 

@@ -35,9 +35,11 @@ class KVObject(object):
     # onObservableInit() hooks
     kvpub = KVPublisher()
 
-    # NOTE: These are added to KVObject by kvWatch module
+    # NOTE: These are added to KVObject by other modules
     def kvwatcher(self, kvpath=None):
         raise NotImplementedError('Provided by kvWatcher module')
     def kvwatch(obj, kvpath=None, notify=False):
         raise NotImplementedError('Provided by kvWatcher module')
+    def kvo(rootOrPath, kvpath=None):
+        raise NotImplementedError('Provided by kvObserver module')
 
