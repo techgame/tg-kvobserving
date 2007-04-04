@@ -37,16 +37,16 @@ class KVObserver(KVPathLink):
         if key not in self.kvOperators:
             value = getattr(host, key, self.valueDefault)
         else: value = host
-        self._callNotify(host, value)
+        self._callNotify(value)
     _onLinkWatched = _onLinkValueChanged
 
     def _onLinkIncomplete(self, linkHost, key, kvpath):
-        self._callNotify(None, self.valueDefault)
+        self._callNotify(self.valueDefault)
 
-    def _callNotify(self, host, value):
+    def _callNotify(self, value):
         notify = self.notify
         if notify is not None:
-            notify(host, value)
+            notify(self.root, value)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
