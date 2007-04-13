@@ -36,13 +36,14 @@ class KVPublisher(object):
     onObservableClassInit.priority = -10
 
     def onObservableInit(self, pubName, obInstance):
-        if self.host is None:
+        if pubName not in vars(obInstance):
             self.copyWithHost(obInstance, pubName)
     onObservableInit.priority = -10
 
     def copyWithHost(self, host, pubName=None):
-        if host is not None:
-            wrhost = ref(host)
+        if host is None:
+            return
+        wrhost = ref(host)
         selfCopy = self.copy()
         selfCopy.host = wrhost
         setattr(host, pubName or self.pubName, selfCopy)

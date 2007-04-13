@@ -50,7 +50,7 @@ class KVObserver(KVPathLink):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def kvobserve(rootOrPath, kvpath=None):
+def kvobserve(rootOrPath, kvpath=None, notify=None):
     """KVObserver decorator that attaches to a method"""
     if kvpath is None:
         kvpath = rootOrPath
@@ -62,7 +62,10 @@ def kvobserve(rootOrPath, kvpath=None):
         root = rootOrPath
 
     obs = KVObserver(root, kvpath)
-    return obs.decorate
+    if notify is not None:
+        return obs.decorate(notify)
+    else: 
+        return obs.decorate
 
 KVObject.kvo = kvobserve
 KVObject.kvobserve = classmethod(kvobserve)
