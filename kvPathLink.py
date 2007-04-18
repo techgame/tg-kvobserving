@@ -39,6 +39,9 @@ class KVPathLink(object):
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, '.'.join(self.kvpath._kvpath_))
 
+    def isLinkable(self):
+        return not (self.root is None or self.kvpath is None)
+
     def asKVPath(self, path):
         return KVPath(path)
 

@@ -22,6 +22,7 @@ class KVObserver(KVPathLink):
     notify = None
 
     def onObservableInit(self, pubName, obInstance):
+        """Connect to the instance's kvpub when it is created"""
         self.link(root=obInstance)
     onObservableInit.priority = 5
 
@@ -29,6 +30,7 @@ class KVObserver(KVPathLink):
         self.notify = notify
         if self.root is None:
             notify.onObservableInit = self.onObservableInit
+        self.link()
         return notify
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +43,8 @@ class KVObserver(KVPathLink):
     _onLinkWatched = _onLinkValueChanged
 
     def _onLinkIncomplete(self, linkHost, key, kvpath):
-        self._callNotify(self.valueDefault)
+        if self.isLinkable():
+            self._callNotify(self.valueDefault)
 
     def _callNotify(self, value):
         notify = self.notify

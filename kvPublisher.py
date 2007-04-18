@@ -26,6 +26,9 @@ class KVPublisher(object):
         self.koset = self.KeyedObserverSet()
         self.host = None
 
+    def __repr__(self):
+        return '<%s to: %r>' % (self.__class__.__name__, self.koset)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def onObservableClassInit(self, pubName, obKlass):
