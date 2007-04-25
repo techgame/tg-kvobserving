@@ -21,14 +21,19 @@ class KVObserver(KVPathLink):
     valueDefault = None
     notify = None
 
+    _chainOnObservableInit = None
     def onObservableInit(self, pubName, obInstance):
         """Connect to the instance's kvpub when it is created"""
         self.link(root=obInstance)
+        chain = self._chainOnObservableInit
+        if chain is not None:
+            chain(pubName, obInstance)
     onObservableInit.priority = 5
 
     def decorate(self, notify):
         self.notify = notify
         if self.root is None:
+            self._chainOnObservableInit = getattr(notify, 'onObservableInit', None)
             notify.onObservableInit = self.onObservableInit
         self.link()
         return notify
