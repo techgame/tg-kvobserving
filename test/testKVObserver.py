@@ -30,11 +30,11 @@ class TestKVObserve(unittest.TestCase):
 
         d = DemoObj()
 
-        self.assertEqual(result, [None])
+        self.assertEqual(result, [])
 
         d.left = 2
 
-        self.assertEqual(result, [None, 2])
+        self.assertEqual(result, [2])
     
     def testPathWithNonKVObject(self):
         class fobject(object): pass

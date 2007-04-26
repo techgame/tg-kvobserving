@@ -21,22 +21,23 @@ class KVObserver(KVPathLink):
     valueDefault = None
     notify = None
 
+    def initLink(self, root, kvpath):
+        self.configLink(root, kvpath)
+
+    def copyWithRoot(self, root, updateLink=False):
+        result = self.__class__(root, self.kvpath)
+        result.setNotify(self.notify, updateLink)
+        return result
+
     _chainOnObservableInit = None
     def onObservableInit(self, pubName, obInstance):
         """Connect to the instance's kvpub when it is created"""
-        self.link(root=obInstance)
         chain = self._chainOnObservableInit
         if chain is not None:
             chain(pubName, obInstance)
-    onObservableInit.priority = 5
 
-    def decorate(self, notify):
-        self.notify = notify
-        if self.root is None:
-            self._chainOnObservableInit = getattr(notify, 'onObservableInit', None)
-            notify.onObservableInit = self.onObservableInit
-        self.link()
-        return notify
+        self = self.copyWithRoot(obInstance)
+    onObservableInit.priority = 5
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,6 +51,16 @@ class KVObserver(KVPathLink):
     def _onLinkIncomplete(self, linkHost, key, kvpath):
         if self.isLinkable():
             self._callNotify(self.valueDefault)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def setNotify(self, notify, updateLink=True):
+        self.notify = notify
+        if self.root is None:
+            self._chainOnObservableInit = getattr(notify, 'onObservableInit', None)
+            notify.onObservableInit = self.onObservableInit
+        else: self.link(updateLink=updateLink)
+        return notify
 
     def _callNotify(self, value):
         notify = self.notify
@@ -71,9 +82,9 @@ def kvobserve(rootOrPath, kvpath=None, notify=None):
 
     obs = KVObserver(root, kvpath)
     if notify is not None:
-        return obs.decorate(notify)
+        return obs.setNotify(notify)
     else: 
-        return obs.decorate
+        return obs.setNotify
 
 KVObject.kvo = kvobserve
 KVObject.kvobserve = classmethod(kvobserve)

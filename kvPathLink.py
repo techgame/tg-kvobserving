@@ -31,7 +31,7 @@ class KVPathLink(object):
 
     def __init__(self, root=None, kvpath=None):
         self._kvlinks = []
-        self.link(root, kvpath)
+        self.initLink(root, kvpath)
 
     def __del__(self):
         self.unlink()
@@ -45,7 +45,20 @@ class KVPathLink(object):
     def asKVPath(self, path):
         return KVPath(path)
 
-    def link(self, root=NotImplemented, kvpath=NotImplemented):
+    def configLink(self, root=NotImplemented, kvpath=NotImplemented):
+        if root is not NotImplemented:
+            self.root = root
+        else: root = self.root
+        if kvpath is not NotImplemented:
+            kvpath = self.asKVPath(kvpath)
+            self.kvpath = kvpath
+        else: kvpath = self.kvpath
+        return root, kvpath
+
+    def initLink(self, root, kvpath):
+        self.link(root, kvpath)
+
+    def link(self, root=NotImplemented, kvpath=NotImplemented, updateLink=True):
         # unlink if we have a current link
         if self._kvlinks:
             self.unlink()
@@ -55,14 +68,10 @@ class KVPathLink(object):
         kvlinks = self._kvlinks
         
         # setup our starting kvobj and kvpath
-        if root is not NotImplemented:
-            self.root = root
-        else: root = self.root
-        if kvpath is not NotImplemented:
-            self.kvpath = self.asKVPath(kvpath)
+        root, kvpath = self.configLink(root, kvpath)
 
         kvobj = root
-        kvpath = list(self.kvpath)
+        kvpath = list(kvpath)
 
         if root is None or not kvpath:
             # the root kvobj is missing... just note it so it can be updated later
@@ -99,8 +108,9 @@ class KVPathLink(object):
         kvlinks.append((key, kvpub))
         self._linkWatcher(kvlinks)
 
-        # send out the linkWatched notification
-        self._onLinkWatched(kvobj, key)
+        if updateLink:
+            # send out the linkWatched notification
+            self._onLinkWatched(kvobj, key)
         return True
 
     # link will call unlink if _kvlinks is not empty
