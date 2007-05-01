@@ -21,15 +21,10 @@ class KVProperty(OBProperty):
     """Publishes a key-value pair
     
     Can only be used on a KVObject-based instance"""
-    def __init__(self, factory=NotImplemented, isValue=None, publish=None):
-        if publish:
-            self.public = publish
-        OBProperty.__init__(self, factory, isValue)
+    _private_fmt = '__kv_%s'
 
     def onObservableClassInit(self, propertyName, obKlass):
-        if self.public is None:
-            self.public = propertyName
-        elif self.public == True:
+        if self.public == True:
             # true signifies that this is a protected reflection of a public
             # name... just remove the leading underscores
             propertyName = propertyName.split('__', 1)
@@ -37,9 +32,7 @@ class KVProperty(OBProperty):
                 propertyName = propertyName[1]
             else: propertyName = propertyName[0].lstrip('_')
 
-            self.public = propertyName
-
-        self.private = "__kv_"+propertyName
+        self._setPublishName(propertyName)
 
     def _modified_(self, obInst):
         obInst.kvpub(self.public, obInst)
