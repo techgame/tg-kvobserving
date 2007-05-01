@@ -12,19 +12,18 @@
 
 from weakref import ref
 
-from TG.metaObserving import observerSet
+from TG.metaObserving import OBKeyedSet
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVPublisher(object):
-    KeyedObserverSet = observerSet.KeyedObserverSet
     pubName = 'kvpub'
+    host = None
 
     def __init__(self):
-        self.koset = self.KeyedObserverSet()
-        self.host = None
+        self.koset = OBKeyedSet()
 
     def __repr__(self):
         return '<%s to: %r>' % (self.__class__.__name__, self.koset)
@@ -32,10 +31,10 @@ class KVPublisher(object):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def onObservableClassInit(self, pubName, obKlass):
-        selfCopy = self.copy()
+        self = self.copy()
         if pubName != self.pubName:
             self.pubName = pubName
-        setattr(obKlass, pubName, selfCopy)
+        setattr(obKlass, pubName, self)
     onObservableClassInit.priority = -10
 
     def onObservableInit(self, pubName, obInstance):
@@ -46,25 +45,34 @@ class KVPublisher(object):
     def copyWithHost(self, host, pubName=None):
         if host is None:
             return
-        wrhost = ref(host)
-        selfCopy = self.copy()
-        selfCopy.host = wrhost
-        setattr(host, pubName or self.pubName, selfCopy)
-        return selfCopy
+        self = self.copy()
+        self.host = ref(host, self._onHostExpire)
+        setattr(host, pubName or self.pubName, self)
+        return self
+
+    def _onHostExpire(self, ref):
+        self.clear()
+        del self.host
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @classmethod
     def new(klass):
-        return klass()
+        return klass.__new__(klass)
 
     def copy(self):
         result = self.new()
         return result.copyFrom(self)
 
     def copyFrom(self, other):
+        if self.pubName != other.pubName:
+            self.pubName = other.pubName
+
         self.koset = other.koset.copy()
-        self.host = other.host
+        host = other.host
+        if host is not None:
+            self.host = ref(host(), self._onHostExpire)
+        else: self.host = None
         return self
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,7 +109,7 @@ class KVPublisher(object):
     _kvqueue = None
     def publish(self, key, host=None):
         if host is not None and self.host is None:
-            self = self.copyWithHost(host, self.pubName)
+            self = self.copyWithHost(host)
 
         kvqueue = self._kvqueue
         if kvqueue is not None:
@@ -116,7 +124,7 @@ class KVPublisher(object):
 
     def publishQue(self, kvqueue, host=None):
         if host is not None and self.host is None:
-            self = self.copyWithHost(host, self.pubName)
+            self = self.copyWithHost(host)
 
         # loop optimized version of publish()
         host = self.host()

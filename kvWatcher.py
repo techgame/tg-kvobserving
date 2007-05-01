@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.metaObserving.observerSet import ObserverSet
+from TG.metaObserving import OBSet
 from .kvObject import KVObject
 from .kvProperty import KVProperty
 from .kvPathLink import KVPathLink
@@ -22,7 +22,7 @@ from .kvPathLink import KVPathLink
 class KVWatcher(KVObject, KVPathLink):
     valueDefault = None
     value = KVProperty(valueDefault)
-    vobs = KVProperty(ObserverSet)
+    vobs = KVProperty(OBSet)
 
     select = KVProperty(valueDefault)
 
