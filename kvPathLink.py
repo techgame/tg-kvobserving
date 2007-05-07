@@ -10,6 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import weakref
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,9 +35,6 @@ class KVPathLink(object):
         self._kvlinks = []
         self.initLink(root, kvpath)
 
-    def __del__(self):
-        self.unlink()
-
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, '.'.join(self.kvpath._kvpath_))
 
@@ -47,6 +46,8 @@ class KVPathLink(object):
 
     def configLink(self, root=NotImplemented, kvpath=NotImplemented):
         if root is not NotImplemented:
+            if root is not None:
+                root = weakref.proxy(root)
             self.root = root
         else: root = self.root
         if kvpath is not NotImplemented:
