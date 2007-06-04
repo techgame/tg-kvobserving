@@ -14,7 +14,7 @@ from kvObject import KVObject
 
 from kvProperty import KVProperty, kvproperty
 
-from kvDict import KVDict
+from kvDict import KVDict, KVKeyedDict, KVNamespace
 from kvSet import KVSet
 from kvList import KVList
 
