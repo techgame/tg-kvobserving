@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .kvObject import KVObject
+from .kvProperty import kvproperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ KV Dict Implementation 
@@ -50,6 +51,7 @@ class KVDict(dict, KVObject):
         result = dict.popitem(self)
         self.kvpub('*')
         return result
+KVDict.property = classmethod(kvproperty)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -92,6 +94,7 @@ class KVKeyedDict(dict, KVObject):
         result = dict.popitem(self)
         self.kvpub(result[0])
         return result
+KVKeyedDict.property = classmethod(kvproperty)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

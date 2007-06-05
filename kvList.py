@@ -11,6 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .kvObject import KVObject
+from .kvProperty import kvproperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ KV List Implementation 
@@ -66,5 +67,6 @@ class KVList(list, KVObject):
     def extend(self, other):
         list.extend(self, other)
         self.kvpub('*')
+KVList.property = classmethod(kvproperty)
 
 
