@@ -106,10 +106,22 @@ class KVPublisher(object):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    def __call__(self, key, *args, **kw):
+        if key.startswith('@'):
+            return self.event(key, *args, **kw)
+        else:
+            return self.publish(key, *args, **kw)
+
+    def event(self, key, *args, **kw):
+        entry = self.koset.get(key)
+        if entry:
+            _host_ = self.host()
+            entry.call_ak(_host_, key, *args, **kw)
+
     _kvqueue = None
-    def publish(self, key, host=None):
-        if host is not None and self.host is None:
-            self = self.copyWithHost(host)
+    def publish(self, key, _host_=None):
+        if _host_ is not None and self.host is None:
+            self = self.copyWithHost(_host_)
 
         kvqueue = self._kvqueue
         if kvqueue is not None:
@@ -118,16 +130,15 @@ class KVPublisher(object):
 
         entry = self.koset.get(key)
         if entry:
-            host = self.host()
-            entry.call_n2(host, key)
-    __call__ = publish
+            _host_ = self.host()
+            entry.call_n2(_host_, key)
 
-    def publishQue(self, kvqueue, host=None):
-        if host is not None and self.host is None:
-            self = self.copyWithHost(host)
+    def publishQue(self, kvqueue, _host_=None):
+        if _host_ is not None and self.host is None:
+            self = self.copyWithHost(_host_)
 
         # loop optimized version of publish()
-        host = self.host()
+        _host_ = self.host()
         koset = self.koset
 
         visited = set()
@@ -140,7 +151,8 @@ class KVPublisher(object):
             # visit as in publish()
             entry = koset.get(key)
             if entry:
-                entry.call_n2(host, key)
+                entry.call_n2(_host_, key)
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Locking access

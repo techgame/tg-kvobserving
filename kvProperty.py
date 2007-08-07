@@ -35,7 +35,7 @@ class KVProperty(OBProperty):
         self._setPublishName(propertyName)
 
     def _modified_(self, obInst):
-        obInst.kvpub(self.public, obInst)
+        obInst.kvpub.publish(self.public, _host_=obInst)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Extend KVObjectType

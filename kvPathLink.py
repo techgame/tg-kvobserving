@@ -131,14 +131,14 @@ class KVPathLink(object):
 
         key, kvpub = kvlinks[-1]
         if kvpub is not None:
-            kvpub.change(bAdd, key, self._onLinkValueChanged)
+            kvpub.change(bAdd, key, self._onLinkEndpointChanged)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def _onLinkPathChanged(self, host, key): self.relink()
     def _onLinkIncomplete(self, linkHost, key, kvpath): pass
     def _onLinkWatched(self, host, key): pass
-    def _onLinkValueChanged(self, host, key): pass
+    def _onLinkEndpointChanged(self, host, key): pass
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

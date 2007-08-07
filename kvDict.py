@@ -23,33 +23,33 @@ class KVDict(dict, KVObject):
 
     def __setitem__(self, key, item): 
         dict.__setitem__(self, key, item)
-        self.kvpub('*')
+        self.kvpub.publish('*')
     def __delitem__(self, key): 
         dict.__delitem__(self, key)
-        self.kvpub('*')
+        self.kvpub.publish('*')
     def clear(self): 
         dict.clear(self)
-        self.kvpub('*')
+        self.kvpub.publish('*')
     def update(self, *args, **kwargs):
         dict.update(self, *args, **kwargs)
-        self.kvpub('*')
+        self.kvpub.publish('*')
     def setdefault(self, key, failobj=None):
         if key in self:
             result = self.get(key)
         else:
             result = dict.setdefault(self, key, failobj)
-            self.kvpub('*')
+            self.kvpub.publish('*')
         return result
     def pop(self, key, *args):
         if key in self:
             result = dict.pop(self, key)
-            self.kvpub('*')
+            self.kvpub.publish('*')
         else:
             result = dict.pop(self, key, *args)
         return result
     def popitem(self):
         result = dict.popitem(self)
-        self.kvpub('*')
+        self.kvpub.publish('*')
         return result
 KVDict.property = classmethod(kvproperty)
 
@@ -61,38 +61,38 @@ class KVKeyedDict(dict, KVObject):
 
     def __setitem__(self, key, item): 
         dict.__setitem__(self, key, item)
-        self.kvpub(key)
+        self.kvpub.publish(key)
     def __delitem__(self, key): 
         dict.__delitem__(self, key)
-        self.kvpub(key)
+        self.kvpub.publish(key)
     def clear(self): 
         keys = self.keys()
         dict.clear(self)
         for k in keys:
-            self.kvpub(k)
+            self.kvpub.publish(k)
     def update(self, *args, **kwargs):
         ud = dict()
         ud.update(*args, **kwargs)
         dict.update(self, ud)
         for k in ud.keys():
-            self.kvpub(k)
+            self.kvpub.publish(k)
     def setdefault(self, key, failobj=None):
         if key in self:
             result = self.get(key)
         else:
             result = dict.setdefault(self, key, failobj)
-            self.kvpub(key)
+            self.kvpub.publish(key)
         return result
     def pop(self, key, *args):
         if key in self:
             result = dict.pop(self, key)
-            self.kvpub(key)
+            self.kvpub.publish(key)
         else:
             result = dict.pop(self, key, *args)
         return result
     def popitem(self):
         result = dict.popitem(self)
-        self.kvpub(result[0])
+        self.kvpub.publish(result[0])
         return result
 KVKeyedDict.property = classmethod(kvproperty)
 

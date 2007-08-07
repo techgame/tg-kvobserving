@@ -17,8 +17,7 @@ from .kvPathLink import KVPathLink
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class KVObserver(KVPathLink):
-    valueDefault = None
+class KVBaseObserver(KVPathLink):
     notify = None
 
     def initLink(self, root, kvpath):
@@ -41,19 +40,6 @@ class KVObserver(KVPathLink):
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def _onLinkValueChanged(self, host, key):
-        if key not in self.kvOperators:
-            value = getattr(host, key, self.valueDefault)
-        else: value = host
-        self._callNotify(value)
-    _onLinkWatched = _onLinkValueChanged
-
-    def _onLinkIncomplete(self, linkHost, key, kvpath):
-        if self.isLinkable():
-            self._callNotify(self.valueDefault)
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     def setNotify(self, notify, updateLink=True):
         self.notify = notify
         if self.root is None:
@@ -62,11 +48,43 @@ class KVObserver(KVPathLink):
         else: self.link(updateLink=updateLink)
         return notify
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Value Observer
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class KVValueObserver(KVBaseObserver):
+    valueDefault = None
+
+    def _onLinkEndpointChanged(self, host, key):
+        if key not in self.kvOperators:
+            value = getattr(host, key, self.valueDefault)
+        else: value = host
+        self._callNotify(value)
+    _onLinkWatched = _onLinkEndpointChanged
+
+    def _onLinkIncomplete(self, linkHost, key, kvpath):
+        if self.isLinkable():
+            self._callNotify(self.valueDefault)
+
     def _callNotify(self, value):
         notify = self.notify
         if notify is not None:
             notify(self.root, value)
 
+KVObserver = KVValueObserver
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ EventObserver
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class KVEventObserver(KVBaseObserver):
+    def _onLinkEndpointChanged(self, host, key, *args, **kw):
+        notify = self.notify
+        if notify is not None:
+            notify(self.root, *args, **kw)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~ Event Hooking
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def kvobserve(rootOrPath, kvpath=None, notify=None):
@@ -80,7 +98,10 @@ def kvobserve(rootOrPath, kvpath=None, notify=None):
     else:
         root = rootOrPath
 
-    obs = KVObserver(root, kvpath)
+    if '@' in kvpath:
+        obs = KVEventObserver(root, kvpath)
+    else:
+        obs = KVValueObserver(root, kvpath)
     if notify is not None:
         return obs.setNotify(notify)
     else: 

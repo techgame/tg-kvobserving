@@ -23,59 +23,59 @@ class KVSet(set, KVObject):
 
     def add(self, item):
         set.add(self, item)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def remove(self, item):
         set.remove(self, item)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def discard(self, item):
         set.discard(self, item)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def pop(self):
         result = set.pop(self)
-        self.kvpub('*')
+        self.kvpub.publish('*')
         return result
 
     def clear(self):
         set.clear(self)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def __ior__(self, other):
         set.__ior__(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
         return self
 
     def update(self, other):
         set.update(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def __iand__(self, other):
         set.__iand__(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
         return self
 
     def intersection_update(self, other):
         set.intersection_update(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def __isub__(self, other):
         set.__isub__(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
         return self
 
     def difference_update(self, other):
         set.difference_update(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 
     def __ixor__(self, other):
         set.__ixor__(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
         return self
 
     def symmetric_difference_update(self, other):
         set.symmetric_difference_update(self, other)
-        self.kvpub('*')
+        self.kvpub.publish('*')
 KVSet.property = classmethod(kvproperty)
 
