@@ -39,14 +39,14 @@ class KVWatcher(KVObject, KVPathLink):
         observer(self, self.value)
         return self.add(observer)
 
-    def _onLinkValueChanged(self, host, key):
+    def _onLinkEndpointChanged(self, host, key):
         if key not in self.kvOperators:
             value = getattr(host, key, self.valueDefault)
         else: value = host
 
         self.value = value
         self.vobs.call_n2(self, value)
-    _onLinkWatched = _onLinkValueChanged
+    _onLinkWatched = _onLinkEndpointChanged
 
     def _onLinkIncomplete(self, linkHost, key, kvpath):
         value = self.valueDefault
