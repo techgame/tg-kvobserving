@@ -11,7 +11,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from TG.metaObserving import OBProperty
-from .kvObject import KVObjectType, KVObject
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ KV Property Implementation 
@@ -35,16 +34,14 @@ class KVProperty(OBProperty):
         self._setPublishName(propertyName)
 
     def _modified_(self, obInst):
-        obInst.kvpub.publish(self.public, _host_=obInst)
+        obInst.kvpub.publishProp(self.public, obInst)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~ Extend KVObjectType
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+kvproperty = KVProperty.factoryMethod()
 
-def kvproperty(kvObjectFactory, *args, **kw):
-    if args or kw:
-        instFactory = lambda: kvObjectFactory(*args, **kw)
-    else: instFactory = kvObjectFactory
-    return KVProperty(instFactory)
-KVObjectType.kvproperty = kvproperty
+class KVObjectProperty(KVProperty):
+    def __set__(self, obInst, value):
+        dobj = self.__get__(obInst, type(obInst))
+        dobj._prop_set_(self, obInst, value)
+
+kvObjProperty = KVObjectProperty.factoryMethod()
 

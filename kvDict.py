@@ -11,13 +11,20 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .kvObject import KVObject
-from .kvProperty import kvproperty
+from .kvProperty import kvObjProperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ KV Dict Implementation 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVDict(dict, KVObject):
+    def _prop_set_(self, prop, host, value):
+        if isinstance(value, type(self)):
+            return prop.set(host, value)
+        else:
+            dict.clear(self)
+            self.update(value)
+
     def copy(self):
         return type(self)(self)
 
@@ -51,11 +58,21 @@ class KVDict(dict, KVObject):
         result = dict.popitem(self)
         self.kvpub.publish('*')
         return result
-KVDict.property = classmethod(kvproperty)
+KVDict.property = classmethod(kvObjProperty)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVKeyedDict(dict, KVObject):
+    def _prop_set_(self, prop, host, value):
+        if isinstance(value, type(self)):
+            return prop.set(host, value)
+        else:
+            keys = set(self.iterkeys())
+            dict.clear(self)
+            dict.update(value)
+            keys.update(self.iterkeys())
+            self.kvpub.publishAll(keys)
+
     def copy(self):
         return type(self)(self)
 
@@ -68,14 +85,12 @@ class KVKeyedDict(dict, KVObject):
     def clear(self): 
         keys = self.keys()
         dict.clear(self)
-        for k in keys:
-            self.kvpub.publish(k)
+        self.kvpub.publishAll(keys)
     def update(self, *args, **kwargs):
         ud = dict()
         ud.update(*args, **kwargs)
         dict.update(self, ud)
-        for k in ud.keys():
-            self.kvpub.publish(k)
+        self.kvpub.publishAll(ud.iterkeys())
     def setdefault(self, key, failobj=None):
         if key in self:
             result = self.get(key)
@@ -94,15 +109,24 @@ class KVKeyedDict(dict, KVObject):
         result = dict.popitem(self)
         self.kvpub.publish(result[0])
         return result
-KVKeyedDict.property = classmethod(kvproperty)
+KVKeyedDict.property = classmethod(kvObjProperty)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVNamespace(KVKeyedDict):
     def __getattr__(self, name):
-        return self[name]
+        if name in type(self).__dict__:
+            return KVKeyedDict.__getattr__(self, name)
+        else:
+            return self[name]
     def __setattr__(self, name, value):
-        self[name] = value
+        if name in type(self).__dict__:
+            return KVKeyedDict.__setattr__(self, name, value)
+        else:
+            self[name] = value
     def __delattr__(self, name):
-        del self[name]
+        if name in type(self).__dict__:
+            return KVKeyedDict.__delattr__(self, name)
+        else:
+            del self[name]
 

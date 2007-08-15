@@ -11,13 +11,19 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .kvObject import KVObject
-from .kvProperty import kvproperty
+from .kvProperty import kvObjProperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ KV List Implementation 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVList(list, KVObject):
+    def _prop_set_(self, prop, host, value):
+        if isinstance(value, type(self)):
+            return prop.set(host, value)
+        else:
+            self[:] = value
+
     def copy(self):
         return type(self)(self)
 
@@ -55,6 +61,8 @@ class KVList(list, KVObject):
         result = list.pop(self, i)
         self.kvpub.publish('*')
         return result
+    def clear(self, item): 
+        del self[:]
     def remove(self, item): 
         list.remove(self, item)
         self.kvpub.publish('*')
@@ -67,6 +75,6 @@ class KVList(list, KVObject):
     def extend(self, other):
         list.extend(self, other)
         self.kvpub.publish('*')
-KVList.property = classmethod(kvproperty)
+KVList.property = classmethod(kvObjProperty)
 
 

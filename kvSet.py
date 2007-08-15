@@ -11,13 +11,20 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from .kvObject import KVObject
-from .kvProperty import kvproperty
+from .kvProperty import kvObjProperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ KV Set Implementation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVSet(set, KVObject):
+    def _prop_set_(self, prop, host, value):
+        if isinstance(value, type(self)):
+            return prop.set(host, value)
+        else:
+            set.clear(self)
+            self.update(value)
+
     def copy(self):
         return type(self)(self)
 
@@ -77,5 +84,6 @@ class KVSet(set, KVObject):
     def symmetric_difference_update(self, other):
         set.symmetric_difference_update(self, other)
         self.kvpub.publish('*')
-KVSet.property = classmethod(kvproperty)
+
+KVSet.property = classmethod(kvObjProperty)
 

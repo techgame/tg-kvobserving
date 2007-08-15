@@ -115,14 +115,10 @@ class KVPublisher(object):
     def event(self, key, *args, **kw):
         entry = self.koset.get(key)
         if entry:
-            _host_ = self.host()
-            entry.call_ak(_host_, key, *args, **kw)
+            entry.call_ak(self.host(), key, *args, **kw)
 
     _kvqueue = None
-    def publish(self, key, _host_=None):
-        if _host_ is not None and self.host is None:
-            self = self.copyWithHost(_host_)
-
+    def publish(self, key):
         kvqueue = self._kvqueue
         if kvqueue is not None:
             kvqueue.append(key)
@@ -130,29 +126,30 @@ class KVPublisher(object):
 
         entry = self.koset.get(key)
         if entry:
-            _host_ = self.host()
-            entry.call_n2(_host_, key)
+            entry.call_n2(self.host(), key)
 
-    def publishQue(self, kvqueue, _host_=None):
-        if _host_ is not None and self.host is None:
-            self = self.copyWithHost(_host_)
+    def publishProp(self, key, host):
+        if self.host is None:
+            self = self.copyWithHost(host)
+        self.publish(key)
 
-        # loop optimized version of publish()
-        _host_ = self.host()
+    def publishAll(self, iterkeys):
+        kvqueue = self._kvqueue
+        if kvqueue is not None:
+            kvqueue.extend(iterkeys)
+            return
+
         koset = self.koset
-
-        visited = set()
-        for key in kvqueue:
-            if key in visited: 
-                # already published
-                continue
-            else: visited.add(key)
-
-            # visit as in publish()
+        host = self.host()
+        for key in iterkeys:
             entry = koset.get(key)
             if entry:
-                entry.call_n2(_host_, key)
+                entry.call_n2(host, key)
 
+    def publishQue(self, kvqueue):
+        keyset = set()
+        self.publishAll((keyset.add(key), key)[1] 
+                for key in kvqueue if key not in keyset)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Locking access
@@ -172,12 +169,10 @@ class KVPublisher(object):
         if depth == 0:
             kvqueue = self._kvqueue
             del self._kvqueue
+            del self._ctxdepth
 
             if bPublish:
                 self.publishQue(kvqueue)
-
-            del self._ctxdepth
-
             return kvqueue
 
         self._ctxdepth = depth

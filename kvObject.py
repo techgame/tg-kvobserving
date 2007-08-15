@@ -21,10 +21,6 @@ class KVObjectType(MetaObservableType):
     """Subclass of ObservableType enabling subclassing and instantiation as
     cooperative events, and customization to the key-value observing design."""
 
-    # NOTE: This method is provided by KVProperty
-    def kvproperty(kvObjectFactory, *args, **kw):
-        raise NotImplementedError('Provided by kvProperty module')
-
 class KVObject(object):
     """Subclass of object using KVObjectType as the metaclass so subclass
     declaration and class instantiation are observable events"""
