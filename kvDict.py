@@ -69,7 +69,7 @@ class KVKeyedDict(dict, KVObject):
         else:
             keys = set(self.iterkeys())
             dict.clear(self)
-            dict.update(value)
+            dict.update(self, value)
             keys.update(self.iterkeys())
             self.kvpub.publishAll(keys)
 
