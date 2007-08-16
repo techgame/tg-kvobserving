@@ -51,8 +51,8 @@ class KVPublisher(object):
         return self
 
     def _onHostExpire(self, ref):
+        self.host = None
         self.clear()
-        del self.host
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -88,7 +88,8 @@ class KVPublisher(object):
     def discard(self, key, kvObserver):
         return self.koset.discard(key, kvObserver)
     def clear(self, key=None):
-        return self.koset.clear(key)
+        if self.koset:
+            return self.koset.clear(key)
 
     def on(self, key):
         return lambda kvObserver: self.add(key, kvObserver)
