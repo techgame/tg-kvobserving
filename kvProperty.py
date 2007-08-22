@@ -32,6 +32,7 @@ class KVProperty(OBProperty):
             else: propertyName = propertyName[0].lstrip('_')
 
         self._setPublishName(propertyName)
+    onObservableClassInit.priority = OBProperty.onObservableClassInit.priority
 
     def _modified_(self, obInst):
         obInst.kvpub.publishProp(self.public, obInst)
@@ -42,6 +43,10 @@ class KVObjectProperty(KVProperty):
     def __set__(self, obInst, value):
         dobj = self.__get__(obInst, type(obInst))
         dobj._prop_set_(self, obInst, value)
+
+    def __set_factory__(self, obInst, value):
+        self.set(obInst, value)
+        value._prop_init_(self, obInst, value)
 
 kvObjProperty = KVObjectProperty.factoryMethod()
 

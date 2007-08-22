@@ -14,7 +14,7 @@ from __future__ import with_statement
 
 import unittest
 
-from TG.kvObserving import KVObject, KVProperty, KVList, KVDict, KVWatcher, kvwatch, kv, kvobserve
+from TG.kvObserving import KVObject, KVProperty, KVList, KVDict, kvobserve
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -47,7 +47,7 @@ class KVDemoDepData(KVObject):
 
     @kvobserve('sum')
     def onMethodNotify(self, value):
-        self.kvpub('methodNotify')
+        self.kvpub('@methodNotify')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -56,10 +56,9 @@ class TestKVDependentData(unittest.TestCase):
         result = []
         demo = KVDemoDepData()
 
-        @kvwatch(demo, kv.sum)
-        def onSumChange(kvw, value):
-            #print 'sum:', key, value
-            result.append(value)
+        @demo.kvpub.on('sum')
+        def onSumChange(host, key):
+            result.append(host.sum)
 
         self.assertEqual(result, [])
 
@@ -73,10 +72,9 @@ class TestKVDependentData(unittest.TestCase):
         result = []
         demo = KVDemoDepData()
 
-        @kvwatch(demo, kv.prod)
-        def onProdChange(kvw, value):
-            #print 'prod:', key, value
-            result.append(value)
+        @demo.kvpub.on('prod')
+        def onProdChange(host, key):
+            result.append(host.prod)
 
         self.assertEqual(result, [])
 
@@ -93,9 +91,9 @@ class TestKVDependentData(unittest.TestCase):
         result = []
         demo = KVDemoDepData()
 
-        @kvwatch(demo, kv.prodSum)
-        def onProdSumChange(kvw, value):
-            result.append(value)
+        @demo.kvpub.on('prodSum')
+        def onProdSumChange(host, key):
+            result.append(host.prodSum)
 
         self.assertEqual(result, [])
 
@@ -112,8 +110,8 @@ class TestKVDependentData(unittest.TestCase):
         result = [0]
         demo = KVDemoDepData()
 
-        @kvwatch(demo, kv.methodNotify)
-        def onMethodNotify(kvw, value):
+        @demo.kvpub.on('@methodNotify')
+        def onMethodNotify(host, key):
             result[0] += 1
 
         self.assertEqual(result, [0])

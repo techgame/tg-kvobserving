@@ -18,6 +18,8 @@ from .kvProperty import kvObjProperty
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVSet(set, KVObject):
+    def _prop_init_(self, prop, host, value):
+        pass
     def _prop_set_(self, prop, host, value):
         if isinstance(value, type(self)):
             return prop.set(host, value)
