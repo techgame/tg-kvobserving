@@ -30,9 +30,9 @@ kvOperators = {
 
 class KVPathLink(object):
     kvOperators = kvOperators
+    _kvlinks = None
 
     def __init__(self, root=None, kvpath=None):
-        self._kvlinks = []
         self.initLink(root, kvpath)
 
     def __repr__(self):
@@ -64,11 +64,13 @@ class KVPathLink(object):
         if self._kvlinks:
             self.unlink()
 
-        # clear our link table
-        self._kvlinks[:] = []
-        kvlinks = self._kvlinks
-        
+            # clear our link table
+            self._kvlinks[:] = []
+        else:
+            self._kvlinks = []
+
         # setup our starting kvobj and kvpath
+        kvlinks = self._kvlinks
         root, kvpath = self.configLink(root, kvpath)
 
         kvobj = root
@@ -115,7 +117,8 @@ class KVPathLink(object):
         return True
 
     # link will call unlink if _kvlinks is not empty
-    relink = link 
+    def relink(self):
+        self.link()
 
     def unlink(self):
         kvlinks = self._kvlinks[:]

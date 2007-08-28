@@ -20,5 +20,5 @@ from kvList import KVList
 
 from kvPathLink import kv, KVPath, KVPathLink
 from kvObserver import KVObserver, kvobserve
-from kvWatcher import KVWatcher, kvwatch
+from kvWatcher import KVWatcher, KVWatchAttr, kvwatch
 

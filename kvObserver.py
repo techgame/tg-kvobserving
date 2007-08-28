@@ -19,6 +19,7 @@ from .kvPathLink import KVPathLink
 
 class KVBaseObserver(KVPathLink):
     notify = None
+    updateOnInit = False
 
     def initLink(self, root, kvpath):
         self.configLink(root, kvpath)
@@ -35,7 +36,7 @@ class KVBaseObserver(KVPathLink):
         if chain is not None:
             chain(pubName, obInstance)
 
-        self = self.copyWithRoot(obInstance)
+        self = self.copyWithRoot(obInstance, self.updateOnInit)
     onObservableInit.priority = 5
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,11 +55,14 @@ class KVBaseObserver(KVPathLink):
 
 class KVValueObserver(KVBaseObserver):
     valueDefault = None
+    updateOnInit = True
 
     def _onLinkEndpointChanged(self, host, key):
-        if key not in self.kvOperators:
+        if key in self.kvOperators:
+            value = host
+        else: 
             value = getattr(host, key, self.valueDefault)
-        else: value = host
+
         self._callNotify(value)
     _onLinkWatched = _onLinkEndpointChanged
 

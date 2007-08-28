@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.metaObserving import OBSet
+from TG.metaObserving import OBSet, OBNamedAttribute
 from .kvObject import KVObject
 from .kvProperty import KVProperty
 from .kvPathLink import KVPathLink
@@ -21,10 +21,25 @@ from .kvPathLink import KVPathLink
 
 class KVWatcher(KVObject, KVPathLink):
     valueDefault = None
-    value = KVProperty(valueDefault)
     vobs = KVProperty(OBSet)
 
+    value = KVProperty(valueDefault)
     select = KVProperty(valueDefault)
+
+    def __init__(self, root=None, kvpath=None, vobs=None):
+        if vobs is not None:
+            self.vobs = vobs
+        KVPathLink.__init__(self, root, kvpath)
+
+    def copyWithRoot(self, root):
+        return self.__class__(root, self.kvpath, self.vobs.copy())
+
+    def onObservableInit(self, pubName, obInstance):
+        """Connect to the instance's kvpub when it is created"""
+        self = self.copyWithRoot(obInstance)
+    onObservableInit.priority = 5
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def add(self, observer):
         self.vobs.add(observer)
@@ -52,6 +67,43 @@ class KVWatcher(KVObject, KVPathLink):
         value = self.valueDefault
         self.value = value
         self.vobs.call_n2(self, value)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class KVWatchAttr(OBNamedAttribute, KVPathLink):
+    _private_fmt = '__kvw_%s'
+    valueDefault = None
+
+    def __init__(self, kvpath, publish=None):
+        OBNamedAttribute.__init__(self, publish)
+        KVPathLink.__init__(self, None, kvpath)
+
+    def initLink(self, root, kvpath):
+        self.configLink(root, kvpath)
+
+    def copy(self):
+        return self.__class__(self.kvpath, self.public)
+
+    def onObservableInit(self, pubName, obInstance):
+        """Connect to the instance's kvpub when it is created"""
+        self = self.copy()
+        setattr(obInstance, self.private, self)
+        self.link(obInstance)
+    onObservableInit.priority = 5
+
+    def _onLinkEndpointChanged(self, host, key):
+        if key not in self.kvOperators:
+            value = getattr(host, key, self.valueDefault)
+        else: value = host
+        self.publish(value)
+    _onLinkWatched = _onLinkEndpointChanged
+
+    def _onLinkIncomplete(self, linkHost, key, kvpath):
+        self.publish(self.valueDefault)
+
+    def publish(self, value):
+        setattr(self.root, self.public, value)
+        self.root.kvpub.publish(self.public)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Extend KVObject
