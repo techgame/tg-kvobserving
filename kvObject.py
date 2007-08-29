@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from TG.metaObserving import MetaObservableType, OBFactoryMap
+from TG.metaObserving import MetaObservableType, OBFactoryMap, OBSettings
 from .kvPublisher import KVPublisher
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

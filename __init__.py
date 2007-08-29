@@ -10,7 +10,7 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from kvObject import KVObject, OBFactoryMap
+from kvObject import KVObject, OBFactoryMap, OBSettings
 
 from kvProperty import KVProperty, kvproperty, KVObjectProperty, kvObjProperty
 
