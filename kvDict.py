@@ -121,16 +121,27 @@ class KVNamespace(KVKeyedDict):
     def __getattr__(self, name):
         if name in type(self).__dict__:
             return KVKeyedDict.__getattr__(self, name)
-        else:
+
+        try:
             return self[name]
+        except LookupError, e:
+            raise AttributeError(str(e))
+
     def __setattr__(self, name, value):
         if name in type(self).__dict__:
             return KVKeyedDict.__setattr__(self, name, value)
-        else:
+
+        try:
             self[name] = value
+        except LookupError, e:
+            raise AttributeError(str(e))
+
     def __delattr__(self, name):
         if name in type(self).__dict__:
             return KVKeyedDict.__delattr__(self, name)
-        else:
+
+        try:
             del self[name]
+        except LookupError, e:
+            raise AttributeError(str(e))
 
