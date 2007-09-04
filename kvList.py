@@ -20,6 +20,8 @@ from .kvProperty import kvObjProperty
 class KVList(list, KVObject):
     def _prop_init_(self, prop, host, value):
         pass
+    def _prop_get_(self, prop, host):
+        return self
     def _prop_set_(self, prop, host, value):
         if isinstance(value, type(self)):
             return prop.set(host, value)

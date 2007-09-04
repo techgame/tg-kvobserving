@@ -39,6 +39,10 @@ class KVWatcher(KVObject, KVPathLink):
         self = self.copyWithRoot(obInstance)
     onObservableInit.priority = 5
 
+    def onObservableRestore(self, pubName, obInstance):
+        self.onObservableInit(pubName, obInstance)
+    onObservableRestore.priority = onObservableInit.priority
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def add(self, observer):
@@ -90,6 +94,10 @@ class KVWatchAttr(OBNamedAttribute, KVPathLink):
         setattr(obInstance, self.private, self)
         self.link(obInstance)
     onObservableInit.priority = 5
+
+    def onObservableRestore(self, pubName, obInstance):
+        self.onObservableInit(pubName, obInstance)
+    onObservableRestore.priority = onObservableInit.priority
 
     def _onLinkEndpointChanged(self, host, key):
         if key not in self.kvOperators:

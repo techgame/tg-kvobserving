@@ -20,6 +20,8 @@ from .kvProperty import kvObjProperty
 class KVDict(dict, KVObject):
     def _prop_init_(self, prop, host, value):
         pass
+    def _prop_get_(self, prop, host):
+        return self
     def _prop_set_(self, prop, host, value):
         if isinstance(value, type(self)):
             return prop.set(host, value)
@@ -67,6 +69,8 @@ KVDict.property = classmethod(kvObjProperty)
 class KVKeyedDict(dict, KVObject):
     def _prop_init_(self, prop, host, value):
         pass
+    def _prop_get_(self, prop, host):
+        return self
     def _prop_set_(self, prop, host, value):
         if isinstance(value, type(self)):
             return prop.set(host, value)

@@ -17,6 +17,26 @@ from .kvPathLink import KVPathLink
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+def addMethodObserverable(method, observer):
+    observers = getattr(method, 'observers', [])
+    observers.append(observer)
+    setattr(method, 'observers', observers)
+
+    initFns = [e.onObservableInit for e in observers if hasattr(e, 'onObservableInit')]
+    def onObservableInit(pubName, obInstance, initFns=initFns):
+        for onObservableInit in initFns:
+            onObservableInit(pubName, obInstance)
+    method.onObservableInit = onObservableInit
+
+    restoreFns = [e.onObservableRestore for e in observers if hasattr(e, 'onObservableRestore')]
+    def onObservableRestore(pubName, obInstance, restoreFns=restoreFns):
+        for onObservableRestore in restoreFns:
+            onObservableRestore(pubName, obInstance)
+    method.onObservableRestore = onObservableRestore
+    return method
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 class KVBaseObserver(KVPathLink):
     notify = None
     updateOnInit = False
@@ -29,25 +49,25 @@ class KVBaseObserver(KVPathLink):
         result.setNotify(self.notify, updateLink)
         return result
 
-    _chainOnObservableInit = None
     def onObservableInit(self, pubName, obInstance):
         """Connect to the instance's kvpub when it is created"""
-        chain = self._chainOnObservableInit
-        if chain is not None:
-            chain(pubName, obInstance)
-
         self = self.copyWithRoot(obInstance, self.updateOnInit)
     onObservableInit.priority = 5
+
+    def onObservableRestore(self, pubName, obInstance):
+        self = self.copyWithRoot(obInstance, False)
+    onObservableRestore.priority = onObservableInit.priority
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def setNotify(self, notify, updateLink=True):
         self.notify = notify
         if self.root is None:
-            self._chainOnObservableInit = getattr(notify, 'onObservableInit', None)
-            notify.onObservableInit = self.onObservableInit
+            self.addMethodObserverable(notify, self)
         else: self.link(updateLink=updateLink)
         return notify
+
+    addMethodObserverable = staticmethod(addMethodObserverable)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Value Observer

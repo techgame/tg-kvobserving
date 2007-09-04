@@ -40,6 +40,10 @@ class KVProperty(OBProperty):
 kvproperty = KVProperty.factoryMethod()
 
 class KVObjectProperty(KVProperty):
+    def __get__(self, obInst, obKlass):
+        dobj = KVProperty.__get__(self, obInst, obKlass)
+        return dobj._prop_get_(self, obInst)
+
     def __set__(self, obInst, value):
         dobj = self.__get__(obInst, type(obInst))
         dobj._prop_set_(self, obInst, value)

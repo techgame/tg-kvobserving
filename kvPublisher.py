@@ -42,6 +42,10 @@ class KVPublisher(object):
             self.copyWithHost(obInstance, pubName)
     onObservableInit.priority = -10
 
+    def onObservableRestore(self, pubName, obInstance):
+        self.onObservableInit(pubName, obInstance)
+    onObservableRestore.priority = onObservableInit.priority
+
     def copyWithHost(self, host, pubName=None):
         if host is None:
             return
