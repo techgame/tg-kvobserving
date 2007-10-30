@@ -11,7 +11,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import unittest
-from TG.kvObserving import KVObject, KVProperty
+from TG.kvObserving import KVObject, KVInitProperty
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
@@ -22,7 +22,7 @@ class TestKVObserve(unittest.TestCase):
         result = []
         class DemoObj(KVObject):
             kvobserve = KVObject.kvobserve
-            left = KVProperty(None)
+            left = KVInitProperty(None)
 
             @kvobserve('left')
             def change(self, value):
@@ -30,11 +30,11 @@ class TestKVObserve(unittest.TestCase):
 
         d = DemoObj()
 
-        self.assertEqual(result, [])
+        self.assertEqual(result, [None])
 
         d.left = 2
 
-        self.assertEqual(result, [2])
+        self.assertEqual(result, [None, 2])
     
     def testPathWithNonKVObject(self):
         class fobject(object): pass
@@ -42,7 +42,7 @@ class TestKVObserve(unittest.TestCase):
         result = []
         class DemoObj(KVObject):
             kvobserve = KVObject.kvobserve
-            left = KVProperty(None)
+            left = KVInitProperty(None)
 
             @kvobserve('left.fun')
             def change(self, value):
@@ -69,12 +69,12 @@ class TestKVObserve(unittest.TestCase):
     
     def testPath(self):
         class tobject(KVObject): 
-            fun = KVProperty(None)
+            fun = KVInitProperty(None)
 
         result = []
         class DemoObj(KVObject):
             kvobserve = KVObject.kvobserve
-            left = KVProperty(None)
+            left = KVInitProperty(None)
 
             @kvobserve('left.fun')
             def change(self, value):

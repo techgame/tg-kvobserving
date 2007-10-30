@@ -37,7 +37,14 @@ class KVProperty(OBProperty):
     def _modified_(self, obInst):
         obInst.kvpub.publishProp(self.public, obInst)
 
-kvproperty = KVProperty.factoryMethod()
+kvProperty = KVProperty.factoryMethod()
+kvproperty = kvProperty
+
+class KVInitProperty(KVProperty):
+    def onObservableInit(self, propertyName, obInstance):
+        self.__get__(obInstance, type(obInstance))
+    onObservableInit.priority = -5
+kvInitProperty = KVProperty.factoryMethod()
 
 class KVObjectProperty(KVProperty):
     def __get__(self, obInst, obKlass):
