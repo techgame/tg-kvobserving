@@ -129,9 +129,16 @@ class KVPublisher(object):
             kvqueue.append(key)
             return
 
-        entry = self.koset.get(key)
+        host = self.host()
+        koset = self.koset
+
+        entry = koset.get(key)
         if entry:
-            entry.call_n2(self.host(), key)
+            entry.call_n2(host, key)
+
+        allEntry = koset.get('*')
+        if allEntry:
+            allEntry.call_n2(host, key)
 
     def publishProp(self, key, host):
         if self.host is None:
@@ -144,12 +151,15 @@ class KVPublisher(object):
             kvqueue.extend(iterkeys)
             return
 
-        koset = self.koset
         host = self.host()
+        koset = self.koset
+        allEntry = koset.get('*')
         for key in iterkeys:
             entry = koset.get(key)
             if entry:
                 entry.call_n2(host, key)
+            if allEntry:
+                allEntry.call_n2(host, key)
 
     def publishQue(self, kvqueue):
         keyset = set()
