@@ -48,6 +48,8 @@ kvInitProperty = KVProperty.factoryMethod()
 
 class KVObjectProperty(KVProperty):
     def __get__(self, obInst, obKlass):
+        if obInst is None: return self
+
         dobj = KVProperty.__get__(self, obInst, obKlass)
         return dobj._prop_get_(self, obInst)
 
