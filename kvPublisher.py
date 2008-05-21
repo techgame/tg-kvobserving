@@ -133,9 +133,13 @@ class KVPublisher(object):
             return self.publish(key, *args, **kw)
 
     def event(self, key, *args, **kw):
+        host = self.host
+        if host is not None:
+            host = host()
+
         entry = self.koset.get(key)
         if entry:
-            entry.call_ak(self.host(), key, *args, **kw)
+            entry.call_ak(host, key, *args, **kw)
 
     _kvqueue = None
     def publish(self, key):
