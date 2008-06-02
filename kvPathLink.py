@@ -49,12 +49,12 @@ class KVPathLink(object):
             if root is not None:
                 root = weakref.proxy(root)
             self.root = root
-        else: root = self.root
+
         if kvpath is not NotImplemented:
             kvpath = self.asKVPath(kvpath)
             self.kvpath = kvpath
         else: kvpath = self.kvpath
-        return root, kvpath
+        return self.root, kvpath
 
     def initLink(self, root, kvpath):
         self.link(root, kvpath)

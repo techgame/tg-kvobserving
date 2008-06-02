@@ -32,10 +32,8 @@ class KVPublisher(object):
         return (self.pubName, host)
     def __setstate__(self, (pubName, host)):
         self.koset = OBKeyedSet()
-        if pubName != self.pubName:
-            self.pubName = pubName
         if host is not None:
-            self._setHost(host(), pubName)
+            self.copyWithHost(host(), pubName)
 
     def __repr__(self):
         return '<%s to: %r>' % (self.__class__.__name__, self.koset)
