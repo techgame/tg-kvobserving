@@ -26,10 +26,7 @@ class KVPublisher(object):
         self.koset = OBKeyedSet()
 
     def __getstate__(self):
-        host = self.host
-        if host is None:
-            return None, self.pubName
-        return (self.pubName, host)
+        return (self.pubName, self.host)
     def __setstate__(self, (pubName, host)):
         self.koset = OBKeyedSet()
         if host is not None:
