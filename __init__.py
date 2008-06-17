@@ -15,7 +15,7 @@ from kvObject import KVObject, OBFactoryMap, OBSettings
 from kvProperty import KVProperty, KVObjectProperty
 from kvProperty import KVInitProperty
 
-from kvDict import KVDict, KVKeyedDict, KVNamespace
+from kvDict import KVDict, KVKeyedDict, KVNamespace, KVObjectNS
 from kvSet import KVSet
 from kvList import KVList
 

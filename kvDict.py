@@ -149,3 +149,36 @@ class KVNamespace(KVKeyedDict):
         except LookupError, e:
             raise AttributeError(str(e))
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+class KVObjectNS(KVObject):
+    ns = None
+
+    def __init__(self):
+        self.ns = KVKeyedDict()
+        self.ns.kvpub = self.kvpub
+
+    def __getattr__(self, name):
+        try:
+            return self.ns[name]
+        except LookupError, e:
+            raise AttributeError(str(e))
+
+    def __setattr__(self, name, value):
+        if name in type(self).__dict__:
+            return KVObject.__setattr__(self, name, value)
+
+        try:
+            self.ns[name] = value
+        except LookupError, e:
+            raise AttributeError(str(e))
+
+    def __delattr__(self, name):
+        if name in type(self).__dict__:
+            return KVObject.__delattr__(self, name)
+
+        try:
+            del self.ns[name]
+        except LookupError, e:
+            raise AttributeError(str(e))
+
