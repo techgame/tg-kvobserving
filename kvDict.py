@@ -148,6 +148,7 @@ class KVNamespace(KVKeyedDict):
             del self[name]
         except LookupError, e:
             raise AttributeError(str(e))
+KVNamespace.property = classmethod(kvObjProperty)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -181,4 +182,5 @@ class KVObjectNS(KVObject):
             del self.ns[name]
         except LookupError, e:
             raise AttributeError(str(e))
+KVObjectNS.property = classmethod(kvObjProperty)
 
