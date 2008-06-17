@@ -159,6 +159,13 @@ class KVObjectNS(KVObject):
         self.ns = KVKeyedDict()
         self.ns.kvpub = self.kvpub
 
+    def _prop_init_(self, prop, host, value):
+        pass
+    def _prop_get_(self, prop, host):
+        return self
+    def _prop_set_(self, prop, host, value):
+        return prop.set(host, value)
+
     def __getattr__(self, name):
         try:
             return self.ns[name]
