@@ -39,15 +39,18 @@ class KVPathLink(object):
         return "<%s: %s>" % (self.__class__.__name__, '.'.join(self.kvpath._kvpath_))
 
     def isLinkable(self):
-        return not (self.root is None or self.kvpath is None)
+        return (self.root is not None) and (self.kvpath is not None)
 
     def asKVPath(self, path):
         return KVPath(path)
 
+    def _clearRoot(self, wr=None):
+        self.link(None)
+
     def configLink(self, root=NotImplemented, kvpath=NotImplemented):
         if root is not NotImplemented:
             if root is not None:
-                root = weakref.proxy(root)
+                root = weakref.proxy(root, self._clearRoot)
             self.root = root
 
         if kvpath is not NotImplemented:
