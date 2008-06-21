@@ -92,8 +92,12 @@ class KVValueObserver(KVBaseObserver):
 
     def _callNotify(self, value):
         notify = self.notify
-        if notify is not None:
-            notify(self.root, value)
+        if notify is None: return
+
+        root = self.root
+        if root is None: return
+
+        notify(root, value)
 
 KVObserver = KVValueObserver
 
@@ -104,8 +108,12 @@ KVObserver = KVValueObserver
 class KVEventObserver(KVBaseObserver):
     def _onLinkEndpointChanged(self, host, key, *args, **kw):
         notify = self.notify
-        if notify is not None:
-            notify(self.root, *args, **kw)
+        if notify is None: return
+
+        root = self.root
+        if root is None: return
+
+        notify(root, *args, **kw)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Event Hooking
