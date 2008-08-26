@@ -36,6 +36,6 @@ class KVObject(object):
         raise NotImplementedError('Provided by kvWatcher module')
     def kvwatch(obj, kvpath=None, notify=False):
         raise NotImplementedError('Provided by kvWatcher module')
-    def kvo(rootOrPath, kvpath=None):
+    def kvo(rootOrPath, kvpath=None, notify=None):
         raise NotImplementedError('Provided by kvObserver module')
 
