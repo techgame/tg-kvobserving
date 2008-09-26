@@ -37,7 +37,7 @@ class KVWatcher(KVObject, KVPathLink):
     def onObservableInit(self, pubName, obInstance):
         """Connect to the instance's kvpub when it is created"""
         self = self.copyWithRoot(obInstance)
-    onObservableInit.priority = 5
+    onObservableInit.priority = 6
 
     def onObservableRestore(self, pubName, obInstance):
         self.onObservableInit(pubName, obInstance)
@@ -92,6 +92,7 @@ class KVWatchAttr(OBNamedAttribute, KVPathLink):
         """Connect to the instance's kvpub when it is created"""
         self = self.copy()
         setattr(obInstance, self.private, self)
+        setattr(obInstance, self.public, self.valueDefault)
         self.link(obInstance)
     onObservableInit.priority = 5
 
@@ -110,8 +111,16 @@ class KVWatchAttr(OBNamedAttribute, KVPathLink):
         self.publish(self.valueDefault)
 
     def publish(self, value):
+        if self.root is None: return
         setattr(self.root, self.public, value)
         self.root.kvpub.publish(self.public)
+
+    #~ loose ends before the attr is bootstrapped ~~~~~~~
+
+    def __get__(self, obInst, obKlass):
+        if obInst is not None:
+            return self.valueDefault
+        else: return self
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Extend KVObject
