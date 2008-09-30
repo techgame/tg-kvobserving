@@ -39,3 +39,6 @@ class KVObject(object):
     def kvo(rootOrPath, kvpath=None, notify=None):
         raise NotImplementedError('Provided by kvObserver module')
 
+    def __setstate__(self, state):
+        type(self).observerNotifyRestore(self)
+

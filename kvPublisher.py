@@ -149,9 +149,10 @@ class KVPublisher(object):
 
         koset = self.koset
 
-        entry = koset.get(key)
-        if entry:
-            entry.call_n2(host, key)
+        if key != '*':
+            entry = koset.get(key)
+            if entry:
+                entry.call_n2(host, key)
 
         allEntry = koset.get('*')
         if allEntry:
@@ -175,9 +176,10 @@ class KVPublisher(object):
         koset = self.koset
         allEntry = koset.get('*')
         for key in iterkeys:
-            entry = koset.get(key)
-            if entry:
-                entry.call_n2(host, key)
+            if key != '*':
+                entry = koset.get(key)
+                if entry:
+                    entry.call_n2(host, key)
             if allEntry:
                 allEntry.call_n2(host, key)
 

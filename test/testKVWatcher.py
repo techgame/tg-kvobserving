@@ -165,7 +165,9 @@ class TestKVWatcher(unittest.TestCase):
 
         @kvwatch(tree, kv.left.data[...])
         def evt(kvw, value):
-            result.append(value.copy())
+            if value is not None:
+                value = value.copy()
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -186,7 +188,9 @@ class TestKVWatcher(unittest.TestCase):
 
         @kvwatch(tree, kv.right.data[...])
         def evt(kvw, value):
-            result.append(value.copy())
+            if value is not None:
+                value = value.copy()
+            result.append(value)
 
         self.assertEqual(result, [])
 
@@ -224,7 +228,9 @@ class TestKVWatcherDependency(unittest.TestCase):
 
         @watchData.add
         def onDataChange(kvw, value):
-            kvw.select = value[0]
+            if value is not None:
+                value = value[0]
+            kvw.select = value
 
         @kvwatch(watchData, kv.select.data)
         def onSelectChange(kvw, value):

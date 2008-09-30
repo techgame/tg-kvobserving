@@ -21,17 +21,20 @@ def addMethodObserverable(method, observer):
     observers = getattr(method, 'observers', [])
     observers.append(observer)
     setattr(method, 'observers', observers)
+    del observers
 
-    initFns = [e.onObservableInit for e in observers if hasattr(e, 'onObservableInit')]
-    def onObservableInit(pubName, obInstance, initFns=initFns):
-        for onObservableInit in initFns:
-            onObservableInit(pubName, obInstance)
+    def onObservableInit(pubName, obInstance):
+        for e in method.observers:
+            obsInit = getattr(e, 'onObservableInit', None)
+            if obsInit is not None:
+                obsInit(pubName, obInstance)
     method.onObservableInit = onObservableInit
 
-    restoreFns = [e.onObservableRestore for e in observers if hasattr(e, 'onObservableRestore')]
-    def onObservableRestore(pubName, obInstance, restoreFns=restoreFns):
-        for onObservableRestore in restoreFns:
-            onObservableRestore(pubName, obInstance)
+    def onObservableRestore(pubName, obInstance):
+        for e in method.observers:
+            obsRestore = getattr(e, 'onObservableRestore', None)
+            if obsRestore is not None:
+                obsRestore(pubName, obInstance)
     method.onObservableRestore = onObservableRestore
     return method
 

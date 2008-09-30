@@ -31,6 +31,8 @@ kvOperators = {
 class KVPathLink(object):
     kvOperators = kvOperators
     _kvlinks = None
+    kvpath = None
+    root = None
 
     def __init__(self, root=None, kvpath=None):
         self.initLink(root, kvpath)

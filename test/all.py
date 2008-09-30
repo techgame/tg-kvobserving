@@ -10,7 +10,8 @@
 #~ Imports 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-import os
+import os, sys
+sys.path.insert(0, os.getcwd())
 from glob import iglob
 import unittest
 
