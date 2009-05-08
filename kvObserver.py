@@ -122,7 +122,7 @@ class KVEventObserver(KVBaseObserver):
 #~ Event Hooking
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def kvobserve(rootOrPath, kvpath=None, notify=None):
+def kvobserve(rootOrPath, kvpath=None, notify=None, asDecorator=True):
     """KVObserver decorator that attaches to a method"""
     if kvpath is None:
         kvpath = rootOrPath
@@ -138,9 +138,13 @@ def kvobserve(rootOrPath, kvpath=None, notify=None):
     else:
         obs = KVValueObserver(root, kvpath)
     if notify is not None:
-        return obs.setNotify(notify)
-    else: 
+        r = obs.setNotify(notify)
+        if asDecorator:
+            return r
+    elif asDecorator:
         return obs.setNotify
+
+    return obs
 
 KVObject.kvo = kvobserve
 KVObject.kvobserve = classmethod(kvobserve)
