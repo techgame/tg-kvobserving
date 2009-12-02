@@ -13,9 +13,19 @@
 from weakref import ref
 
 from TG.metaObserving import OBKeyedSet
+from .kvDispatcher import KVDispatcher
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~ Definitions 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+def unique(iterable):
+    seen = set()
+    for e in iterable:
+        if e not in seen:
+            seen.add(e)
+            yield e
+        
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVPublisher(object):
@@ -34,6 +44,12 @@ class KVPublisher(object):
 
     def __repr__(self):
         return '<%s to: %r>' % (self.__class__.__name__, self.koset)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    KVDispatcher = KVDispatcher
+    def _bindDispatcher(self):
+        return self.KVDispatcher(self.host)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -122,56 +138,69 @@ class KVPublisher(object):
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __call__(self, key, *args, **kw):
+        disp = self._bindDispatcher()
         if key.startswith('@'):
-            return self.event(key, *args, **kw)
+            self._bindEvent(key, disp)
         else:
-            return self.publish(key, *args, **kw)
+            self._bindPublish(key, disp)
+
+        if disp:
+            if args or kw:
+                disp.callEx(*args, **kw)
+            else: disp.call()
 
     def event(self, key, *args, **kw):
-        host = self.host
-        if host is not None:
-            host = host()
+        disp = self._bindDispatcher()
+        self._bindEvent(key, disp)
+        if disp: 
+            if args or kw:
+                disp.callEx(*args, **kw)
+            else: disp.call()
 
-        entry = self.koset.get(key)
-        if entry:
-            entry.call_ak(host, key, *args, **kw)
-
-    _kvqueue = None
     def publish(self, key):
-        kvqueue = self._kvqueue
-        if kvqueue is not None:
-            kvqueue.append(key)
-            return
+        disp = self._bindDispatcher()
+        self._bindPublish(key, disp)
+        if disp: disp.call()
 
-        host = self.host
-        if host is not None:
-            host = host()
-
-        koset = self.koset
-
-        if key != '*':
-            entry = koset.get(key)
-            if entry:
-                entry.call_n2(host, key)
-
-        allEntry = koset.get('*')
-        if allEntry:
-            allEntry.call_n2(host, key)
+    def publishAll(self, iterkeys):
+        disp = self._bindDispatcher()
+        self._bindPublishMany(iterkeys, disp)
+        if disp: disp.call()
 
     def publishProp(self, key, host):
         if self.host is None:
             self = self.copyWithHost(host)
         self.publish(key)
 
-    def publishAll(self, iterkeys):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    def _bindEvent(self, key, disp):
+        entry = self.koset.get(key)
+        if entry:
+            disp.add(entry, key)
+
+    _kvqueue = None
+    def _bindPublish(self, key, disp):
+        kvqueue = self._kvqueue
+        if kvqueue is not None:
+            kvqueue.append(key)
+            return
+
+        koset = self.koset
+        if key != '*':
+            entry = koset.get(key)
+            if entry:
+                disp.add(entry, key)
+
+        allEntry = koset.get('*')
+        if allEntry:
+            disp.add(allEntry, key)
+
+    def _bindPublishMany(self, iterkeys, disp):
         kvqueue = self._kvqueue
         if kvqueue is not None:
             kvqueue.extend(iterkeys)
             return
-
-        host = self.host
-        if host is not None:
-            host = host()
 
         koset = self.koset
         allEntry = koset.get('*')
@@ -179,14 +208,9 @@ class KVPublisher(object):
             if key != '*':
                 entry = koset.get(key)
                 if entry:
-                    entry.call_n2(host, key)
+                    disp.add(entry, key)
             if allEntry:
-                allEntry.call_n2(host, key)
-
-    def publishQue(self, kvqueue):
-        keyset = set()
-        self.publishAll((keyset.add(key), key)[1] 
-                for key in kvqueue if key not in keyset)
+                disp.add(allEntry, key)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #~ Locking access
@@ -201,24 +225,32 @@ class KVPublisher(object):
 
         self._ctxdepth = depth
 
-    def release(self, bPublish=True):
+    def release(self, bPublish=True, bindDispatch=False):
         depth = self._ctxdepth - 1
-        if depth == 0:
-            kvqueue = self._kvqueue
-            del self._kvqueue
-            del self._ctxdepth
+        if depth != 0:
+            self._ctxdepth = depth
+            return None
 
-            if bPublish:
-                self.publishQue(kvqueue)
-            return kvqueue
+        kvqueue = self._kvqueue
+        del self._kvqueue
+        del self._ctxdepth
 
-        self._ctxdepth = depth
-        return None
+        if bPublish:
+            kvqueue = unique(kvqueue)
+            disp = self._bindDispatcher()
+            self._bindPublishMany(kvqueue, disp)
+            if bindDispatch:
+                return disp
+            elif disp:
+                disp.call()
+        return True
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def __enter__(self):
         self.acquire()
     def __exit__(self, exc=None, exc_type=None, exc_tb=None):
-        self.release(exc is None)
+        disp = self.release(exc is None, True)
+        if disp and exc is None:
+            disp.call()
 
