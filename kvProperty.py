@@ -53,6 +53,8 @@ kvproperty = kvProperty
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class KVObjectProperty(KVProperty):
+    missing = None
+
     def __get__(self, obInst, obKlass):
         if obInst is None: return self
 
