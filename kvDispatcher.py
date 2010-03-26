@@ -24,25 +24,6 @@ import traceback
 #~ Definitions 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def format_exception_stack(excInfo=None, limit=None, depth=1, splice=0):
-    if excInfo is None:
-        excInfo = sys.exc_info()
-
-    fexc = traceback.format_exception(*excInfo)
-
-    depth += 1
-    if limit is not None:
-        limit += depth
-    stk = traceback.extract_stack(None, limit)[:-depth]
-    fexc[1:1+splice] = traceback.format_list(stk)
-    return fexc
-
-def print_exception_stack(excInfo=None, limit=None, depth=1, splice=0, file=None):
-    fexc = format_exception_stack(excInfo, limit, depth+1, splice)
-    print >> file, ''.join(fexc)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 class KVDispatcher(object):
     def __init__(self, host=None):
         if host is not None:
@@ -88,6 +69,6 @@ class KVDispatcher(object):
 
     stackLimit = 1
     def onException(self, evtFn, host, evtKey):
-        print_exception_stack(None, self.stackLimit, depth=3, splice=1)
+        sys.excepthook(*sys.exc_info())
         return True
         
